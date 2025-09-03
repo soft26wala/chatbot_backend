@@ -63,6 +63,12 @@ async function getGPTReply(userMessage) {
   }
 }
 
+
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
+
+
 // ✅ Webhook Verification
 app.get("/webhook", (req, res) => {
   const VERIFY_TOKEN = "chatbotgpt"; // same jo Meta dashboard me dala
