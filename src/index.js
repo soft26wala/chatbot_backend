@@ -113,6 +113,6 @@ app.post("/send", async (req, res) => {
   res.json(result);
 });
 
-// ✅ Start server
+// ✅ Start server 
 const PORT = process.env.PORT || 9002;
 app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
