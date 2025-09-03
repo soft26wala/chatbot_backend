@@ -65,6 +65,8 @@ async function getGPTReply(userMessage) {
 
 // ✅ Webhook Verification
 app.get("/webhook", (req, res) => {
+  const VERIFY_TOKEN = "chatbotgpt"; // same jo Meta dashboard me dala
+
   const mode = req.query["hub.mode"];
   const challenge = req.query["hub.challenge"];
   const token = req.query["hub.verify_token"];
