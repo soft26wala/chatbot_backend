@@ -89,12 +89,14 @@ app.get("/webhook", (req, res) => {
 
 // ✅ Incoming Messages
 app.post("/webhook", async (req, res) => {
+  console.log("📩 Incoming:", JSON.stringify(req.body, null, 2));
   try {
     const entry = req.body.entry?.[0];
     const changes = entry?.changes?.[0];
     const messages = changes?.value?.messages;
 
     if (messages && messages[0]) {
+      console.log("👉 New message:", messages[0]);
       const from = messages[0].from;
       const text = messages[0].text?.body;
 
