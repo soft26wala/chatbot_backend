@@ -71,6 +71,8 @@ app.get("/", (req, res) => {
 
 // ✅ Webhook Verification
 app.get("/webhook", (req, res) => {
+    console.log("👉 Meta sent:", req.query); // pura query print karega
+ 
   const VERIFY_TOKEN = "chatbotgpt"; // same jo Meta dashboard me dala
 
   const mode = req.query["hub.mode"];
