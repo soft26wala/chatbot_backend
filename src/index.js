@@ -51,29 +51,33 @@ async function sendMessage(to, message) {
 // ✅ Get GPT Reply
 async function getGPTReply(userMessage) {
   try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions -s", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.Groq_API_KEY}`, // env se lo
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, // ✅ ENV me rakho
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-       "model": "meta-llama/llama-4-scout-17b-16e-instruct",
-        messages: [{ role: "user", content: userMessage }],
+        model: "llama-3.1-8b-instant", // ✅ fast free model
+        messages: [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: userMessage }
+        ],
       }),
     });
 
     const data = await response.json();
 
-    if (data.choices && data.choices.length > 0) {
-      return data.choices[0].message.content.trim();
-    } else {
-      console.error("❌ GPT error response:", data);
-      return "Sorry, I couldn’t understand.";
+    if (!response.ok) {
+      console.error("❌ Groq API Error:", data);
+      return "⚠️ Sorry, something went wrong with Groq API.";
     }
+
+    // ✅ extract reply
+    return data.choices?.[0]?.message?.content || "⚠️ No reply from Groq.";
   } catch (err) {
-    console.error("❌ GPT fetch error:", err);
-    return "Sorry, I couldn’t understand.";
+    console.error("❌ GPT error response:", err);
+    return "⚠️ Sorry, I couldn't understand.";
   }
 }
 
