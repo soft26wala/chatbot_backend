@@ -19,7 +19,7 @@ const openai_api_key = process.env.OPENAI_API_KEY; // ChatGPT API key
 async function sendMessage(to, message) {
   try {
     const response = await fetch(
-      `https://graph.facebook.com/v22.0/${phone_number_id}/messages`,
+      `https://graph.facebook.com/v23.0/${phone_number_id}/messages`,
       {
         method: "POST",
         headers: {
