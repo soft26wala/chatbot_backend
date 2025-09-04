@@ -54,22 +54,29 @@ async function getGPTReply(userMessage) {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${openai_api_key}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // env se lo
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo", // ya gpt-4 use kar
+        model: "gpt-3.5-turbo", // ya "gpt-4" agar key support kare
         messages: [{ role: "user", content: userMessage }],
       }),
     });
 
     const data = await response.json();
-    return data.choices?.[0]?.message?.content || "Sorry, I couldn’t understand.";
+
+    if (data.choices && data.choices.length > 0) {
+      return data.choices[0].message.content.trim();
+    } else {
+      console.error("❌ GPT error response:", data);
+      return "Sorry, I couldn’t understand.";
+    }
   } catch (err) {
-    console.error("❌ GPT Error:", err);
-    return "Error generating response.";
+    console.error("❌ GPT fetch error:", err);
+    return "Sorry, I couldn’t understand.";
   }
 }
+
 
 
 app.get("/", (req, res) => {
