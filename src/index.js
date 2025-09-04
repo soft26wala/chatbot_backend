@@ -15,6 +15,7 @@ const verify_token = process.env.VERIFY_TOKEN || "my_verify_token";
 const openai_api_key = process.env.OPENAI_API_KEY; // ChatGPT API key
 
 // ✅ Send WhatsApp Message
+// ✅ Send message function
 async function sendMessage(to, message) {
   try {
     const response = await fetch(
@@ -27,8 +28,13 @@ async function sendMessage(to, message) {
         },
         body: JSON.stringify({
           messaging_product: "whatsapp",
+          recipient_type: "individual",
           to,
-          text: { body: message },
+          type: "text",
+          text: {
+            preview_url: false,
+            body: message, // dynamic reply
+          },
         }),
       }
     );
@@ -39,6 +45,8 @@ async function sendMessage(to, message) {
     console.error("❌ Failed to send reply:", err);
   }
 }
+
+
 
 // ✅ Get GPT Reply
 async function getGPTReply(userMessage) {
@@ -102,7 +110,7 @@ app.post("/webhook", async (req, res) => {
 
       console.log(`📲 Message from ${from}: ${text}`);
 
-      // 👉 Get GPT reply
+      // 👉 Example GPT integration (or custom logic)
       const reply = await getGPTReply(text);
 
       // 👉 Send back to WhatsApp
@@ -114,6 +122,7 @@ app.post("/webhook", async (req, res) => {
 
   res.sendStatus(200);
 });
+
 
 
 // ✅ Manual Send Endpoint (Postman ke liye)
