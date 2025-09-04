@@ -51,10 +51,10 @@ async function sendMessage(to, message) {
 // ✅ Get GPT Reply
 async function getGPTReply(userMessage) {
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions -s", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // env se lo
+        Authorization: `Bearer ${process.env.Groq_API_KEY}`, // env se lo
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
