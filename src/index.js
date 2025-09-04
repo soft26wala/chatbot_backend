@@ -58,7 +58,7 @@ async function getGPTReply(userMessage) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo", // ya "gpt-4" agar key support kare
+       "model": "meta-llama/llama-4-scout-17b-16e-instruct",
         messages: [{ role: "user", content: userMessage }],
       }),
     });
