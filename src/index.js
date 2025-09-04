@@ -54,7 +54,7 @@ async function getGPTReply(userMessage) {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, // ✅ ENV me rakho
+        "Authorization": `Bearer ${process.env.Groq_API_KEY}`, // ✅ ENV me rakho
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
