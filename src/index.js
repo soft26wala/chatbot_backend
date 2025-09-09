@@ -20,6 +20,8 @@ const openai_api_key = process.env.OPENAI_API_KEY; // ChatGPT API key
 
 // ✅ Send WhatsApp Message
 // ✅ Send message function
+
+
 async function sendMessage(to, message) {
   try {
     const response = await fetch(
@@ -28,6 +30,7 @@ async function sendMessage(to, message) {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
+          // Authorization,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -38,8 +41,11 @@ async function sendMessage(to, message) {
           text: {
             preview_url: false,
             body: message, // dynamic reply
-          },
-        }),
+          }
+        },
+      {
+        status: 201,
+      }),
       }
     );
 
