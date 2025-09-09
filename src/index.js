@@ -3,12 +3,12 @@ import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 import sendtemplate  from "./routes/send-template.js";
-import webhook from "./routes/webhook.js"; 
+// import webhook from "./routes/webhook.js"; 
 
 dotenv.config();
 const app = express();
 app.use(express.json());
-app.use('/webhook', webhook);
+// app.use('/webhook', webhook);
 app.use('/send-template', sendtemplate);
 // WhatsApp config
 const token = process.env.WHATSAPP_TOKEN; 
@@ -92,46 +92,46 @@ app.get("/", (req, res) => {
 
 
 // ✅ Webhook Verification
-// app.get("/webhook", (req, res) => {
+app.get("/webhook", (req, res) => {
  
-//   const VERIFY_TOKEN = "chatbotgpt"; // same jo Meta dashboard me dala
+  const VERIFY_TOKEN = "chatbotgpt"; // same jo Meta dashboard me dala
 
-//   const mode = req.query["hub.mode"];
-//   const challenge = req.query["hub.challenge"];
-//   const token = req.query["hub.verify_token"];
+  const mode = req.query["hub.mode"];
+  const challenge = req.query["hub.challenge"];
+  const token = req.query["hub.verify_token"];
 
-//   if (mode === "subscribe" && token === VERIFY_TOKEN) {
-//     res.status(200).send(challenge);
-//   } else {
-//     res.sendStatus(403);
-//   }
-// });
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    res.status(200).send(challenge);
+  } else {
+    res.sendStatus(403);
+  }
+});
 
 // ✅ Incoming Messages
-// app.post("/webhook", async (req, res) => {
-//   try {
-//     const entry = req.body.entry?.[0];
-//     const changes = entry?.changes?.[0];
-//     const messages = changes?.value?.messages;
+app.post("/webhook", async (req, res) => {
+  try {
+    const entry = req.body.entry?.[0];
+    const changes = entry?.changes?.[0];
+    const messages = changes?.value?.messages;
 
-//     if (messages && messages[0]) {
-//       console.log("👉 New message:", messages[0]);
-//       const from = messages[0].from;
-//       const text = messages[0].text?.body;
+    if (messages && messages[0]) {
+      console.log("👉 New message:", messages[0]);
+      const from = messages[0].from;
+      const text = messages[0].text?.body;
 
 
-//       // 👉 Example GPT integration (or custom logic)
-//       const reply = await getGPTReply(text);
+      // 👉 Example GPT integration (or custom logic)
+      const reply = await getGPTReply(text);
 
-//       // 👉 Send back to WhatsApp
-//       await sendMessage(from, reply);
-//     }
-//   } catch (err) {
-//     console.error("❌ Webhook Error:", err);
-//   }
+      // 👉 Send back to WhatsApp
+      await sendMessage(from, reply);
+    }
+  } catch (err) {
+    console.error("❌ Webhook Error:", err);
+  }
 
-//   res.sendStatus(200);
-// });
+  res.sendStatus(200);
+});
 
 
 
