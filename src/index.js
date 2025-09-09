@@ -2,14 +2,14 @@
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
-import send_template  from "./routes/send-template.js";
+import sendtemplate  from "./routes/send-template.js";
 import webhook from "./routes/webhook.js"; 
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 app.use('/webhook', webhook);
-app.use('/send-template', send_template);
+app.use('/send-template', sendtemplate);
 // WhatsApp config
 const token = process.env.WHATSAPP_TOKEN; 
 const phone_number_id = process.env.PHONE_NUMBER_ID; 
