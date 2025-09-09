@@ -2,10 +2,15 @@
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import send_template  from "./routes/send-template";
+import fetch from "node-fetch";
+import webhook from "./routes/webhook"; 
+
 dotenv.config();
 const app = express();
 app.use(express.json());
-
+app.use('/webhook', webhook)
+app.use('/send-template', send_template)
 // WhatsApp config
 const token = process.env.WHATSAPP_TOKEN; 
 const phone_number_id = process.env.PHONE_NUMBER_ID; 
@@ -81,8 +86,6 @@ async function getGPTReply(userMessage) {
   }
 }
 
-const webhook = require('./routes/webhook')
-const send_template = require('./routes/send-template')
 
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
