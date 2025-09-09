@@ -3,7 +3,6 @@ import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 import send_template  from "./routes/send-template";
-import fetch from "node-fetch";
 import webhook from "./routes/webhook"; 
 
 dotenv.config();
