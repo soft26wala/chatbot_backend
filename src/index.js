@@ -2,8 +2,8 @@
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
-import send_template  from "./routes/send-template";
-import webhook from "./routes/webhook"; 
+import send_template  from "./routes/send-template.js";
+import webhook from "./routes/webhook.js"; 
 
 dotenv.config();
 const app = express();
