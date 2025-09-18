@@ -78,6 +78,16 @@ app.post('/webhook', async (req, res) => {
       if (messages.text.body.toLowerCase() === 'buttons') {
         sendReplyButtons(messages.from)
       }
+
+
+
+        if (messages.text.body.toLowerCase()) {
+        Templead(messages.from)
+      }
+
+       if (messages.text.body.toLowerCase()=== 'template') {
+        Templead(messages.from)
+      }
     }
 
     if (messages.type === 'interactive') {
@@ -241,6 +251,85 @@ async function sendReplyButtons(to) {
     })
   })
 }
+
+
+
+
+
+// <==________________________________________________________________________=>
+
+  
+async function Templead(to) {
+   try {
+    const response = await axios({
+      url: `https://graph.facebook.com/v23.0/${phone_number_id}/messages`,
+      method: "post",
+      headers: {
+        Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      data: {
+        messaging_product: "whatsapp",
+        to,
+        type: "template",
+        template: {
+          name: "your_template_name", // 👈 Meta dashboard se approved template name
+          language: { code: "en_US" },
+          components: [
+            {
+              type: "header",
+              parameters: [
+                {
+                  type: "image",
+                  image: {
+                    link: "https://yourdomain.com/image.jpg", // 👈 image URL
+                  },
+                },
+              ],
+            },
+            {
+              type: "body",
+              parameters: [
+                {
+                  type: "text",
+                  text: "User Name", // 👈 body variable ka value
+                },
+              ],
+            },
+            {
+              type: "button",
+              sub_type: "quick_reply",
+              index: "0",
+              parameters: [
+                {
+                  type: "payload",
+                  payload: "first_button_click",
+                },
+              ],
+            },
+            {
+              type: "button",
+              sub_type: "quick_reply",
+              index: "1",
+              parameters: [
+                {
+                  type: "payload",
+                  payload: "second_button_click",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+
+    console.log("Message sent ✅", response.data);
+  } catch (error) {
+    console.error("Error:", error.response?.data || error.message);
+  }
+}
+
+// <========================================================================> 
 
 app.listen(PORT, () => {
   console.log('Server started on port 3000')
