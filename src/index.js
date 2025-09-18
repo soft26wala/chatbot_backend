@@ -12,7 +12,6 @@ app.use(express.json())
 
 app.get('/', (req, res) => {
   res.send('Whatsapp with Node.js and Webhooks')
-  console.log(process.env.PHONE_NUMBER_ID);
   
 })
 
@@ -58,6 +57,18 @@ app.post('/webhook', async (req, res) => {
     if (messages.type === 'text') {
       if (messages.text.body.toLowerCase() === 'hello') {
         replyMessage(messages.from, 'Hello. How are you?', messages.id)
+      }
+
+       if (messages.text.body.toLowerCase() === 'hi') {
+        replyMessage(messages.from, 'Hello ?', messages.id)
+      }
+
+       if (messages.text.body.toLowerCase() === 'iam fine and you') {
+        replyMessage(messages.from, 'i\'m fine you fine is ok and good day ?', messages.id)
+      }
+
+        if (messages.text.body.toLowerCase() === 'iam fine') {
+        replyMessage(messages.from, 'okay  ?', messages.id)
       }
 
       if (messages.text.body.toLowerCase() === 'list') {
