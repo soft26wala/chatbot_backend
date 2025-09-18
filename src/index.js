@@ -273,7 +273,7 @@ async function Templead(to) {
         to,
         type: "template",
         template: {
-          name: "your_template_name", // 👈 Meta dashboard se approved template name
+          name: "hello_world", // 👈 Meta dashboard se approved template name
           language: { code: "en_US" },
           components: [
             {
