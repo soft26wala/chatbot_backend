@@ -1,156 +1,232 @@
-// index.js
-import express from "express";
-import fetch from "node-fetch";
-import dotenv from "dotenv";
-import sendtemplate  from "./routes/send-template.js";
-// import webhook from "./routes/webhook.js"; 
+const express = require('express')
+const axios = require('axios')
 
-dotenv.config();
-const app = express();
-app.use(express.json());
-// app.use('/webhook', webhook);
-app.use('/send-template', sendtemplate);
-// WhatsApp config
-const token = process.env.WHATSAPP_TOKEN; 
-const phone_number_id = process.env.PHONE_NUMBER_ID; 
-const verify_token = process.env.VERIFY_TOKEN || "my_verify_token";
+const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_TOKEN
+const WEBHOOK_VERIFY_TOKEN = process.env.VERIFY_TOKEN
+const phone_number_id = process.env.PHONE_NUMBER_ID
 
-// OpenAI config
-const openai_api_key = process.env.OPENAI_API_KEY; // ChatGPT API key
+const app = express()
+app.use(express.json())
 
-// ✅ Send WhatsApp Message
-// ✅ Send message function
+app.get('/', (req, res) => {
+  res.send('Whatsapp with Node.js and Webhooks')
+})
 
+app.get('/webhook', (req, res) => {
+  const mode = req.query['hub.mode']
+  const challenge = req.query['hub.challenge']
+  const token = req.query['hub.verify_token']
 
-async function sendMessage(to, message) {
-  try {
-    const response = await fetch(
-      `https://graph.facebook.com/v23.0/${phone_number_id}/messages`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          // Authorization,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          recipient_type: "individual",
-          to,
-          type: "text",
-          text: {
-            preview_url: false,
-            body: message, // dynamic reply
-          }
-        },
-      {
-        status: 201,
-      }),
-      }
-    );
-
-    const data = await response.json();
-    console.log("✅ Reply sent:", data);
-  } catch (err) {
-    console.error("❌ Failed to send reply:", err);
-  }
-}
-
-
-
-// ✅ Get GPT Reply
-async function getGPTReply(userMessage) {
-  try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.Groq_API_KEY}`, // ✅ ENV me rakho
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant", // ✅ fast free model
-        messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: userMessage }
-        ],
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("❌ Groq API Error:", data);
-      return "⚠️ Sorry, something went wrong with Groq API.";
-    }
-
-    // ✅ extract reply
-    return data.choices?.[0]?.message?.content || "⚠️ No reply from Groq.";
-  } catch (err) {
-    console.error("❌ GPT error response:", err);
-    return "⚠️ Sorry, I couldn't understand.";
-  }
-}
-
-
-app.get("/", (req, res) => {
-  res.send("Backend is running 🚀");
-});
-
-
-// ✅ Webhook Verification
-app.get("/webhook", (req, res) => {
- 
-  const VERIFY_TOKEN = "chatbotgpt"; // same jo Meta dashboard me dala
-
-  const mode = req.query["hub.mode"];
-  const challenge = req.query["hub.challenge"];
-  const token = req.query["hub.verify_token"];
-
-  if (mode === "subscribe" && token === VERIFY_TOKEN) {
-    res.status(200).send(challenge);
+  if (mode && token === WEBHOOK_VERIFY_TOKEN) {
+    res.status(200).send(challenge)
   } else {
-    res.sendStatus(403);
+    res.sendStatus(403)
   }
-});
+})
 
-// ✅ Incoming Messages
-app.post("/webhook", async (req, res) => {
-  try {
-    const entry = req.body.entry?.[0];
-    const changes = entry?.changes?.[0];
-    const messages = changes?.value?.messages;
+app.post('/webhook', async (req, res) => {
+  const { entry } = req.body
 
-    if (messages && messages[0]) {
-      console.log("👉 New message:", messages[0]);
-      const from = messages[0].from;
-      const text = messages[0].text?.body;
+  if (!entry || entry.length === 0) {
+    return res.status(400).send('Invalid Request')
+  }
 
+  const changes = entry[0].changes
 
-      // 👉 Example GPT integration (or custom logic)
-      const reply = await getGPTReply(text);
+  if (!changes || changes.length === 0) {
+    return res.status(400).send('Invalid Request')
+  }
 
-      // 👉 Send back to WhatsApp
-      await sendMessage(from, reply);
+  const statuses = changes[0].value.statuses ? changes[0].value.statuses[0] : null
+  const messages = changes[0].value.messages ? changes[0].value.messages[0] : null
+
+  if (statuses) {
+    // Handle message status
+    console.log(`
+      MESSAGE STATUS UPDATE:
+      ID: ${statuses.id},
+      STATUS: ${statuses.status}
+    `)
+  }
+
+  if (messages) {
+    // Handle received messages
+    if (messages.type === 'text') {
+      if (messages.text.body.toLowerCase() === 'hello') {
+        replyMessage(messages.from, 'Hello. How are you?', messages.id)
+      }
+
+      if (messages.text.body.toLowerCase() === 'list') {
+        sendList(messages.from)
+      }
+
+      if (messages.text.body.toLowerCase() === 'buttons') {
+        sendReplyButtons(messages.from)
+      }
     }
-  } catch (err) {
-    console.error("❌ Webhook Error:", err);
+
+    if (messages.type === 'interactive') {
+      if (messages.interactive.type === 'list_reply') {
+        sendMessage(messages.from, `You selected the option with ID ${messages.interactive.list_reply.id} - Title ${messages.interactive.list_reply.title}`)
+      }
+
+      if (messages.interactive.type === 'button_reply') {
+        sendMessage(messages.from, `You selected the button with ID ${messages.interactive.button_reply.id} - Title ${messages.interactive.button_reply.title}`)
+      }
+    }
+    
+    console.log(JSON.stringify(messages, null, 2))
   }
+  
+  res.status(200).send('Webhook processed')
+})
 
-  res.sendStatus(200);
-});
+async function sendMessage(to, body) {
+  await axios({
+    url: `https://graph.facebook.com/v23.0/${phone_number_id}/messages`,
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    data: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to,
+      type: 'text',
+      text: {
+        body
+      }
+    })
+  })
+}
 
+async function replyMessage(to, body, messageId) {
+  await axios({
+    url: `https://graph.facebook.com/v23.0/${phone_number_id}/messages`,
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    data: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to,
+      type: 'text',
+      text: {
+        body
+      },
+      context: {
+        message_id: messageId
+      }
+    })
+  })
+}
 
+async function sendList(to) {
+  await axios({
+    url: `https://graph.facebook.com/v23.0/${phone_number_id}/messages`,
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    data: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to,
+      type: 'interactive',
+      interactive: {
+        type: 'list',
+        header: {
+          type: 'text',
+          text: 'Message Header'
+        },
+        body: {
+          text: 'This is a interactive list message'
+        },
+        footer: {
+          text: 'This is the message footer'
+        },
+        action: {
+          button: 'Tap for the options',
+          sections: [
+            {
+              title: 'First Section',
+              rows: [
+                {
+                  id: 'first_option',
+                  title: 'First option',
+                  description: 'This is the description of the first option'
+                },
+                {
+                  id: 'second_option',
+                  title: 'Second option',
+                  description: 'This is the description of the second option'
+                }
+              ]
+            },
+            {
+              title: 'Second Section',
+              rows: [
+                {
+                  id: 'third_option',
+                  title: 'Third option'
+                }
+              ]
+            }
+          ]
+        }
+      }
+    })
+  })
+}
 
-// ✅ Manual Send Endpoint (Postman ke liye)
-app.post("/send", async (req, res) => {
-  const { to, message } = req.body;
-  if (!to || !message) {
-    return res.status(400).json({ error: "to and message are required" });
-  }
-  const result = await sendMessage(to, message);
-  res.json(result);
-});
+async function sendReplyButtons(to) {
+  await axios({
+    url: `https://graph.facebook.com/v23.0/${phone_number_id}/messages`,
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    data: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to,
+      type: 'interactive',
+      interactive: {
+        type: 'button',
+        header: {
+          type: 'text',
+          text: 'Message Header'
+        },
+        body: {
+          text: 'This is a interactive reply buttons message'
+        },
+        footer: {
+          text: 'This is the message footer'
+        },
+        action: {
+          buttons: [
+            {
+              type: 'reply',
+              reply: {
+                id: 'first_button',
+                title: 'First Button'
+              }
+            },
+            {
+              type: 'reply',
+              reply: {
+                id: 'second_button',
+                title: 'Second Button'
+              }
+            }
+          ]
+        }
+      }
+    })
+  })
+}
 
-// ✅ Start server 
-const PORT = process.env.PORT || 9002;
-app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
+app.listen(3000, () => {
+  console.log('Server started on port 3000')
+})
