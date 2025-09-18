@@ -58,35 +58,29 @@ app.post('/webhook', async (req, res) => {
       if (messages.text.body.toLowerCase() === 'hello') {
         replyMessage(messages.from, 'Hello. How are you?', messages.id)
       }
-
-       if (messages.text.body.toLowerCase() === 'hi') {
+      else if (messages.text.body.toLowerCase() === 'hi') {
         replyMessage(messages.from, 'Hello ?', messages.id)
       }
-
-       if (messages.text.body.toLowerCase() === 'iam fine and you') {
+      else if (messages.text.body.toLowerCase() === 'iam fine and you') {
         replyMessage(messages.from, 'i\'m fine you fine is ok and good day ?', messages.id)
       }
-
-        if (messages.text.body.toLowerCase() === 'iam fine') {
+      else if (messages.text.body.toLowerCase() === 'iam fine') {
         replyMessage(messages.from, 'okay  ?', messages.id)
       }
-
-      if (messages.text.body.toLowerCase() === 'list') {
+      else if (messages.text.body.toLowerCase() === 'list') {
         sendList(messages.from)
       }
-
-      if (messages.text.body.toLowerCase() === 'buttons') {
+      else if (messages.text.body.toLowerCase() === 'buttons') {
         sendReplyButtons(messages.from)
       }
-
-
-
-        if (messages.text.body.toLowerCase()) {
+      else if (messages.text.body.toLowerCase()=== 'template') {
         Templead(messages.from)
       }
-
-       if (messages.text.body.toLowerCase()=== 'template') {
-        Templead(messages.from)
+      else if (messages.text.body.toLowerCase() === 'ok' || messages.text.body.toLowerCase() === 'okay') {
+        replyMessage(messages.from, 'ok', messages.id)
+      }
+      else{
+        replyMessage(messages.from, 'Sorry, I did not understand that. Please type "list", "buttons" or "template".', messages.id)
       }
     }
 
