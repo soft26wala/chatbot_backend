@@ -1,15 +1,19 @@
-const express = require('express')
-const axios = require('axios')
+import express from 'express'
+import axios from 'axios'
+import 'dotenv/config'
 
 const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_TOKEN
 const WEBHOOK_VERIFY_TOKEN = process.env.VERIFY_TOKEN
 const phone_number_id = process.env.PHONE_NUMBER_ID
+const PORT = process.env.PORT || 3000
 
 const app = express()
 app.use(express.json())
 
 app.get('/', (req, res) => {
   res.send('Whatsapp with Node.js and Webhooks')
+  console.log(process.env.PHONE_NUMBER_ID);
+  
 })
 
 app.get('/webhook', (req, res) => {
@@ -227,6 +231,6 @@ async function sendReplyButtons(to) {
   })
 }
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log('Server started on port 3000')
 })
